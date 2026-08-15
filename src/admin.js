@@ -62,7 +62,10 @@ function render() {
       <section class="panel">
         <div class="panel-head">
           <h2>Users</h2>
-          <input id="userSearch" placeholder="Search name or email">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="userSearch" placeholder="Search name or email">
+            <button id="newUser" class="primary">+ ADD USER</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -119,6 +122,7 @@ function render() {
     location.reload();
   };
 
+  document.querySelector("#newUser").onclick = () => createUserForm();
   document.querySelector("#newCampaign").onclick = () => campaignForm();
 
   document.querySelectorAll(".edit-campaign").forEach(btn => {
@@ -143,6 +147,66 @@ function render() {
     document.querySelectorAll("tbody tr").forEach(row => {
       row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
     });
+  };
+}
+
+function createUserForm() {
+  app.innerHTML += `
+    <div class="modal" id="modal">
+      <form class="modal-card" id="createUserForm">
+        <h2>Create New User</h2>
+        <label>Name</label><input id="newName" placeholder="Full name" required>
+        <label>Email</label><input id="newEmail" type="email" placeholder="user@example.com" required>
+        <label>Password</label><input id="newPassword" type="password" minlength="8" placeholder="Minimum 8 characters" required>
+        <label>Membership</label>
+        <select id="newMembership">
+          <option>Standard</option><option>Premium</option><option>VIP</option>
+        </select>
+        <label>Account Status</label>
+        <select id="newStatus">
+          <option>Verified</option><option>Pending</option><option>Suspended</option>
+        </select>
+        <label>Role</label>
+        <select id="newRole">
+          <option value="user">user</option><option value="admin">admin</option>
+        </select>
+        <div class="modal-actions"><button type="button" id="cancel">CANCEL</button><button class="primary" type="submit">CREATE USER</button></div>
+      </form>
+    </div>`;
+
+  document.querySelector("#cancel").onclick = () => document.querySelector("#modal").remove();
+  document.querySelector("#createUserForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const submit = e.currentTarget.querySelector("button[type=submit]");
+    submit.disabled = true;
+    submit.textContent = "CREATING...";
+
+    const { data, error } = await supabase.functions.invoke("admin-create-user", {
+      body: {
+        name: document.querySelector("#newName").value.trim(),
+        email: document.querySelector("#newEmail").value.trim(),
+        password: document.querySelector("#newPassword").value,
+        membership: document.querySelector("#newMembership").value,
+        account_status: document.querySelector("#newStatus").value,
+        role: document.querySelector("#newRole").value
+      }
+    });
+
+    if (error) {
+      submit.disabled = false;
+      submit.textContent = "CREATE USER";
+      return toast(error.message);
+    }
+    if (!data?.ok) {
+      submit.disabled = false;
+      submit.textContent = "CREATE USER";
+      return toast(data?.error || "Could not create user.");
+    }
+
+    document.querySelector("#modal").remove();
+    await loadData();
+    render();
+    toast("User created successfully.");
   };
 }
 
