@@ -18,9 +18,11 @@ function loginView(message = "") {
 function selectedMember() { return state.members[state.selectedIndex] || null; }
 
 async function getUnlockStatus() {
-  const { data, error } = await supabase.from("offer_access_logs").select("id").eq("user_id", state.user.id).gte("accessed_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
-  if (error) return;
-  const limit = Number(state.profile?.unlock_limit || 0);
+  const member = selectedMember();
+  if (!member || !state.user) { state.remaining = 0; state.unlockLocked = true; return; }
+  const limit = Number(member.unlock_limit || 0);
+  const { data, error } = await supabase.from("offer_access_logs").select("id").eq("user_id", state.user.id).eq("offer_owner_id", member.id).gte("accessed_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+  if (error) { state.remaining = 0; state.unlockLocked = true; return; }
   state.remaining = Math.max(limit - (data?.length || 0), 0);
   state.unlockLocked = state.remaining <= 0;
 }
@@ -28,7 +30,7 @@ async function getUnlockStatus() {
 function dashboardView() {
   const user = state.user;
   const p = state.profile;
-  const member = selectedMember() || { id: p.id, name: p.name, membership: p.membership, campaign_name: p.campaign_name, impressions: p.impressions, clicks: p.clicks, cpm: p.cpm, revenue: p.revenue };
+  const member = selectedMember() || { id: p.id, name: p.name, membership: p.membership, campaign_name: p.campaign_name, impressions: p.impressions, clicks: p.clicks, cpm: p.cpm, revenue: p.revenue, unlock_limit: p.unlock_limit };
   const isFirst = state.selectedIndex <= 0;
   const isLast = state.selectedIndex >= state.members.length - 1;
   const unlockClass = state.unlockLocked ? "unlock locked" : "unlock";
@@ -44,8 +46,8 @@ function dashboardView() {
   </main><div id="toast" class="toast"></div>`;
   document.querySelector("#logoutBtn").addEventListener("click", async () => { await supabase.auth.signOut(); state.user = null; state.profile = null; state.members = []; loginView(); });
   document.querySelector("#unlockBtn").addEventListener("click", unlockSelectedOffer);
-  document.querySelector("#anotherBtn").addEventListener("click", () => { if (state.selectedIndex > 0) { state.selectedIndex -= 1; dashboardView(); } });
-  document.querySelector("#moreBtn").addEventListener("click", () => { if (state.selectedIndex < state.members.length - 1) { state.selectedIndex += 1; dashboardView(); } });
+  document.querySelector("#anotherBtn").addEventListener("click", async () => { if (state.selectedIndex > 0) { state.selectedIndex -= 1; await getUnlockStatus(); dashboardView(); } });
+  document.querySelector("#moreBtn").addEventListener("click", async () => { if (state.selectedIndex < state.members.length - 1) { state.selectedIndex += 1; await getUnlockStatus(); dashboardView(); } });
 }
 
 async function unlockSelectedOffer() {
