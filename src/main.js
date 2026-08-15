@@ -31,8 +31,6 @@ function dashboardView() {
   const user = state.user;
   const p = state.profile;
   const member = selectedMember() || { id: p.id, name: p.name, membership: p.membership, campaign_name: p.campaign_name, impressions: p.impressions, clicks: p.clicks, cpm: p.cpm, revenue: p.revenue, unlock_limit: p.unlock_limit };
-  const isFirst = state.selectedIndex <= 0;
-  const isLast = state.selectedIndex >= state.members.length - 1;
   const unlockClass = state.unlockLocked ? "unlock locked" : "unlock";
   const unlockText = state.unlockLocked ? "ACCESS TEMPORARILY LOCKED" : "🔒 UNLOCK EXCLUSIVE ACCESS";
   app.innerHTML = `<main class="page">
@@ -40,14 +38,14 @@ function dashboardView() {
     <section class="card profile"><div><div class="eyebrow">USER NAME</div><h2>${escapeHtml(p?.name || user?.email || "User")}</h2><div class="eyebrow">EMAIL</div><p>${escapeHtml(user?.email || "-")}</p><div class="eyebrow">MEMBER SINCE</div><p>${p?.member_since ? new Date(p.member_since).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "-"}</p></div><div class="profile-status"><div><span>ACCOUNT STATUS</span><strong class="green">${escapeHtml(p?.account_status || "Verified")}</strong></div><div><span>MEMBERSHIP</span><strong>${escapeHtml(p?.membership || "Standard")}</strong></div></div></section>
     <section class="card campaign"><div class="eyebrow">ACTIVE OFFER</div><div class="campaign-name">${escapeHtml(member.name || "Member")}</div></section>
     <button id="unlockBtn" class="${unlockClass}" ${state.unlockLocked ? "disabled" : ""}>${unlockText}</button>
-    <div class="actions"><button id="anotherBtn" ${isFirst ? "disabled" : ""}>← SEE ANOTHER OFFER</button><button id="moreBtn" ${isLast ? "disabled" : ""}>🔥 SHOW ME MORE</button></div>
+    <div class="actions"><button id="anotherBtn">← SEE ANOTHER OFFER</button><button id="moreBtn">🔥 SHOW ME MORE</button></div>
     <section class="stats"><div class="stat"><span>IMPRESSIONS</span><strong>${number(member.impressions)}</strong></div><div class="stat"><span>CLICKS</span><strong>${number(member.clicks)}</strong></div><div class="stat"><span>CTR</span><strong>${ctr(member)}</strong></div><div class="stat"><span>CPM</span><strong>${money(member.cpm)}</strong></div><div class="stat revenue"><span>REVENUE</span><strong>${money(member.revenue)}</strong></div></section>
     <div class="bottom-actions"><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role === "admin" ? '<a class="admin-link" href="/admin.html">ADMIN PANEL</a>' : ""}</div>
   </main><div id="toast" class="toast"></div>`;
   document.querySelector("#logoutBtn").addEventListener("click", async () => { await supabase.auth.signOut(); state.user = null; state.profile = null; state.members = []; loginView(); });
   document.querySelector("#unlockBtn").addEventListener("click", unlockSelectedOffer);
-  document.querySelector("#anotherBtn").addEventListener("click", async () => { if (state.selectedIndex > 0) { state.selectedIndex -= 1; await getUnlockStatus(); dashboardView(); } });
-  document.querySelector("#moreBtn").addEventListener("click", async () => { if (state.selectedIndex < state.members.length - 1) { state.selectedIndex += 1; await getUnlockStatus(); dashboardView(); } });
+  document.querySelector("#anotherBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex > 0 ? state.selectedIndex - 1 : state.members.length - 1; await getUnlockStatus(); dashboardView(); });
+  document.querySelector("#moreBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex < state.members.length - 1 ? state.selectedIndex + 1 : 0; await getUnlockStatus(); dashboardView(); });
 }
 
 async function unlockSelectedOffer() {
