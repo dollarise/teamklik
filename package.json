@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && mkdir -p dist/src && cp src/admin.css dist/src/admin.css",
     "preview": "vite preview"
   },
   "dependencies": {
