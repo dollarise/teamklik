@@ -3,12 +3,14 @@ import { supabase } from "./supabase.js";
 
 const app = document.querySelector("#app");
 const state = { user: null, profile: null, members: [], selectedIndex: 0, unlockLocked: false, remaining: 0 };
+const SELECTED_MEMBER_KEY = "teamklik_selected_member_id";
 
 function money(value) { return `$${Number(value || 0).toFixed(2)}`; }
 function number(value) { return Number(value || 0).toLocaleString("en-US"); }
 function ctr(profile) { if (!profile?.impressions) return "0.00%"; return `${((Number(profile.clicks || 0) / Number(profile.impressions || 0)) * 100).toFixed(2)}%`; }
 function escapeHtml(value = "") { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
 function toast(message) { const el = document.querySelector("#toast"); if (!el) return; el.textContent = message; el.classList.add("show"); clearTimeout(window.__toast); window.__toast = setTimeout(() => el.classList.remove("show"), 2400); }
+function saveSelectedMember() { const member = selectedMember(); if (member?.id) sessionStorage.setItem(SELECTED_MEMBER_KEY, member.id); }
 
 function loginView(message = "") {
   app.innerHTML = `<main class="login-shell"><section class="login-card"><div class="mini-logo">◆</div><h1>Welcome Back</h1><p>Login untuk membuka dashboard earnings Anda.</p><form id="loginForm"><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password" required><button class="primary" type="submit">LOGIN</button><div class="error">${escapeHtml(message)}</div></form><p class="hint">Akun dibuat melalui Supabase Auth.</p></section></main><div id="toast" class="toast"></div>`;
@@ -42,16 +44,17 @@ function dashboardView() {
     <section class="stats"><div class="stat"><span>IMPRESSIONS</span><strong>${number(member.impressions)}</strong></div><div class="stat"><span>CLICKS</span><strong>${number(member.clicks)}</strong></div><div class="stat"><span>CTR</span><strong>${ctr(member)}</strong></div><div class="stat"><span>CPM</span><strong>${money(member.cpm)}</strong></div><div class="stat revenue"><span>REVENUE</span><strong>${money(member.revenue)}</strong></div></section>
     <div class="bottom-actions"><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role === "admin" ? '<a class="admin-link" href="/admin.html">ADMIN PANEL</a>' : ""}</div>
   </main><div id="toast" class="toast"></div>`;
-  document.querySelector("#logoutBtn").addEventListener("click", async () => { await supabase.auth.signOut(); state.user = null; state.profile = null; state.members = []; loginView(); });
+  document.querySelector("#logoutBtn").addEventListener("click", async () => { await supabase.auth.signOut(); sessionStorage.removeItem(SELECTED_MEMBER_KEY); state.user = null; state.profile = null; state.members = []; loginView(); });
   document.querySelector("#unlockBtn").addEventListener("click", unlockSelectedOffer);
-  document.querySelector("#anotherBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex > 0 ? state.selectedIndex - 1 : state.members.length - 1; await getUnlockStatus(); dashboardView(); });
-  document.querySelector("#moreBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex < state.members.length - 1 ? state.selectedIndex + 1 : 0; await getUnlockStatus(); dashboardView(); });
+  document.querySelector("#anotherBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex > 0 ? state.selectedIndex - 1 : state.members.length - 1; saveSelectedMember(); await getUnlockStatus(); dashboardView(); });
+  document.querySelector("#moreBtn").addEventListener("click", async () => { state.selectedIndex = state.selectedIndex < state.members.length - 1 ? state.selectedIndex + 1 : 0; saveSelectedMember(); await getUnlockStatus(); dashboardView(); });
 }
 
 async function unlockSelectedOffer() {
   if (state.unlockLocked) return toast("ACCESS TEMPORARILY LOCKED");
   const member = selectedMember();
   if (!member) return toast("Member offer tidak tersedia.");
+  saveSelectedMember();
   const { data, error } = await supabase.rpc("unlock_offer", { p_offer_owner_id: member.id });
   if (error) return toast(error.message);
   if (!data?.allowed) {
@@ -76,8 +79,14 @@ async function loadDashboard() {
   const { data: members, error: membersError } = await supabase.rpc("get_member_offers");
   if (membersError) { loginView(`Member data error: ${membersError.message}`); return; }
   state.members = members || [];
-  const ownIndex = state.members.findIndex(m => m.id === user.id);
-  state.selectedIndex = ownIndex >= 0 ? ownIndex : 0;
+  const savedMemberId = sessionStorage.getItem(SELECTED_MEMBER_KEY);
+  const savedIndex = savedMemberId ? state.members.findIndex(m => m.id === savedMemberId) : -1;
+  if (savedIndex >= 0) state.selectedIndex = savedIndex;
+  else {
+    const ownIndex = state.members.findIndex(m => m.id === user.id);
+    state.selectedIndex = ownIndex >= 0 ? ownIndex : 0;
+    saveSelectedMember();
+  }
   await getUnlockStatus();
   dashboardView();
 }
