@@ -4,6 +4,7 @@ import { supabase } from "./supabase.js";
 const app = document.querySelector("#app");
 const state = { user:null, profile:null, members:[], selectedIndex:0, unlockLocked:false, remaining:0 };
 const SELECTED_MEMBER_KEY = "teamklik_selected_member_id";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1E2QjwSCs1Gdc_3m54xVLTbIkR0P74XdLcrg5UoOC1Pg";
 const esc = (v="") => String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 const toast = message => { const el=document.querySelector("#toast"); if(!el)return; el.textContent=message; el.classList.add("show"); clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.classList.remove("show"),2400); };
 const selectedMember = () => state.members[state.selectedIndex] || null;
@@ -36,7 +37,7 @@ function dashboardView(){
   <div class="offer-member"><h2>${esc(member.name||"Member")}</h2></div>
   <button id="unlockBtn" class="${unlockClass}" ${state.unlockLocked?"disabled":""}>${unlockText}</button>
   <div class="actions"><button id="anotherBtn">← SEE ANOTHER OFFER</button><button id="moreBtn">🔥 SHOW ME MORE</button></div>
-  <div class="bottom-actions"><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role==="admin"?'<a class="admin-link" href="/admin.html">ADMIN PANEL</a>':""}</div></main><div id="toast" class="toast"></div>`;
+  <div class="bottom-actions"><a id="sheetBtn" class="sheet-link" href="${SHEET_URL}" target="_blank" rel="noopener noreferrer">VIEW INFORMATION</a><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role==="admin"?'<a class="admin-link" href="/admin.html">ADMIN PANEL</a>':""}</div></main><div id="toast" class="toast"></div>`;
   setBanner();
   document.querySelector("#logoutBtn").onclick=async()=>{await supabase.auth.signOut();sessionStorage.removeItem(SELECTED_MEMBER_KEY);state.user=null;state.profile=null;state.members=[];loginView();};
   document.querySelector("#unlockBtn").onclick=unlockSelectedOffer;
