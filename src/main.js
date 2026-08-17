@@ -33,7 +33,7 @@ function dashboardView(){
   app.innerHTML=`<main class="page"><section class="hero"><h1>BOOST YOUR ONLINE EARNINGS</h1><p>Discover Exclusive Opportunities Used By Smart Digital Marketers Worldwide</p></section>
   <section class="card profile"><div class="eyebrow">USER NAME</div><h2>${esc(p?.name||user?.email||"User")}</h2></section>
   <section class="card campaign"><div class="eyebrow">ACTIVE OFFER</div><div class="banner-wrap"><iframe id="bannerFrame" title="Active offer banner" loading="lazy" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe></div></section>
-  <section class="card offer-member"><h2>${esc(member.name||"Member")}</h2></section>
+  <div class="offer-member"><h2>${esc(member.name||"Member")}</h2></div>
   <button id="unlockBtn" class="${unlockClass}" ${state.unlockLocked?"disabled":""}>${unlockText}</button>
   <div class="actions"><button id="anotherBtn">← SEE ANOTHER OFFER</button><button id="moreBtn">🔥 SHOW ME MORE</button></div>
   <div class="bottom-actions"><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role==="admin"?'<a class="admin-link" href="/admin.html">ADMIN PANEL</a>':""}</div></main><div id="toast" class="toast"></div>`;
