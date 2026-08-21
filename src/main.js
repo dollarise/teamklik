@@ -29,12 +29,16 @@ function setBanner(){
 }
 function dashboardView(){
   const p=state.profile; const user=state.user; const member=selectedMember()||{id:p.id,name:p.name,banner_code:null,unlock_limit:p.unlock_limit};
+  const profileName=String(p?.name||"").trim();
+  const emailLocal=String(user?.email||"").split("@")[0].trim();
+  const displayName=profileName && profileName.toLowerCase()!==emailLocal.toLowerCase() ? profileName : "User";
+  const displayMemberName=member.id===p?.id ? displayName : String(member.name||"Member").trim() || "Member";
   const unlockClass=state.unlockLocked?"unlock locked":"unlock";
   const unlockText=state.unlockLocked?"ACCESS TEMPORARILY LOCKED":"🔒 UNLOCK EXCLUSIVE ACCESS";
   app.innerHTML=`<main class="page"><section class="hero"><h1>BOOST YOUR ONLINE EARNINGS</h1><p>Discover Exclusive Opportunities Used By Smart Digital Marketers Worldwide</p></section>
-  <section class="card profile"><div class="eyebrow">USER NAME</div><h2>${esc(p?.name||user?.email||"User")}</h2></section>
+  <section class="card profile"><div class="eyebrow">USER NAME</div><h2>${esc(displayName)}</h2></section>
   <section class="card campaign"><div class="eyebrow">ACTIVE OFFER</div><div class="banner-wrap"><iframe id="bannerFrame" title="Active offer banner" loading="lazy" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe></div></section>
-  <div class="offer-member"><h2>${esc(member.name||"Member")}</h2></div>
+  <div class="offer-member"><h2>${esc(displayMemberName)}</h2></div>
   <button id="unlockBtn" class="${unlockClass}" ${state.unlockLocked?"disabled":""}>${unlockText}</button>
   <div class="actions"><button id="anotherBtn">← SEE ANOTHER OFFER</button><button id="moreBtn">🔥 SHOW ME MORE</button></div>
   <div class="bottom-actions"><a id="sheetBtn" class="sheet-link" href="${SHEET_URL}" target="_blank" rel="noopener noreferrer">VIEW INFORMATION</a><button id="logoutBtn" class="logout">LOG OUT</button>${p?.role==="admin"?'<a class="admin-link" href="/admin.html">ADMIN PANEL</a>':""}</div></main><div id="toast" class="toast"></div>`;
