@@ -133,20 +133,28 @@ function setBanner() {
     (member?.banner_code || "").trim();
 
   frame.srcdoc =
-    code ||
-    `
-    <html>
-    <body style="
-      margin:0;
-      display:grid;
-      place-items:center;
-      height:100%;
-      font-family:Arial;
-      color:#777">
-      Banner belum tersedia
-    </body>
-    </html>
-    `;
+frame.srcdoc = `
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  width:100%;
+  overflow:hidden;
+  background:transparent;
+}
+
+img {
+  max-width:100%;
+  height:auto;
+  display:block;
+}
+
+a {
+  display:block;
+}
+</style>
+${code}
+`;
 }
 
 
