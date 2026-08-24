@@ -1,17 +1,330 @@
-.banner-wrap {
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+  color: #111827;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+
+/* =====================
+   LOGIN
+===================== */
+
+.login-shell {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.login-card {
   width:100%;
-  margin:0;
-  padding:0;
-  background:transparent;
+  max-width:420px;
+  background:#fff;
+  padding:32px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+
+.mini-logo {
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111827;
+  color:#fff;
+  margin-bottom:20px;
+}
+
+
+.login-card h1 {
+  margin:0 0 10px;
+}
+
+
+.login-card p {
+  color:#6b7280;
+}
+
+
+.login-card label {
+  display:block;
+  margin-top:15px;
+  font-size:14px;
+}
+
+
+.login-card input {
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin-top:6px;
+}
+
+
+.primary {
+  width:100%;
+  margin-top:20px;
+  padding:13px;
   border:none;
+  border-radius:10px;
+  background:#111827;
+  color:white;
+  cursor:pointer;
+}
+
+
+
+/* =====================
+   DASHBOARD
+===================== */
+
+
+.page {
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+
+.card {
+  background:white;
+  border-radius:18px;
+  margin-bottom:18px;
+}
+
+
+/* ACTIVE OFFER */
+
+.campaign {
+  padding:0;
   overflow:hidden;
 }
 
-.banner-wrap iframe {
+
+.eyebrow {
+  padding:15px 20px;
+  font-size:13px;
+  font-weight:bold;
+  letter-spacing:.08em;
+  color:#6b7280;
+}
+
+
+/* =====================
+   BANNER RESPONSIVE
+===================== */
+
+
+.banner-wrap {
+
   width:100%;
-  height:auto;
-  min-height:0;
-  border:0;
-  display:block;
+
+  margin:0;
+
+  padding:0;
+
   background:transparent;
+
+  border:none;
+
+  overflow:hidden;
+
+  display:block;
+
+}
+
+
+.banner-wrap iframe {
+
+  width:100%;
+
+  height:auto;
+
+  min-height:0;
+
+  border:0;
+
+  display:block;
+
+  background:transparent;
+
+}
+
+
+/* remove white iframe area */
+
+iframe {
+
+  background:transparent;
+
+}
+
+
+
+/* MEMBER NAME */
+
+.offer-member {
+
+  text-align:center;
+
+  margin:20px 0;
+
+}
+
+
+.offer-member h2 {
+
+  margin:0;
+
+}
+
+
+
+/* =====================
+   BUTTON
+===================== */
+
+
+.unlock {
+
+  width:100%;
+
+  padding:15px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#111827;
+
+  color:white;
+
+  font-size:16px;
+
+  cursor:pointer;
+
+}
+
+
+.unlock.locked {
+
+  opacity:.6;
+
+  cursor:not-allowed;
+
+}
+
+
+
+.actions {
+
+  display:flex;
+
+  gap:12px;
+
+  margin-top:15px;
+
+}
+
+
+.actions button {
+
+  flex:1;
+
+  padding:12px;
+
+  border-radius:12px;
+
+  border:1px solid #ddd;
+
+  background:white;
+
+  cursor:pointer;
+
+}
+
+
+
+/* BOTTOM */
+
+.bottom-actions {
+
+  margin-top:25px;
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:15px;
+
+  flex-wrap:wrap;
+
+}
+
+
+.sheet-link,
+.logout,
+.admin-link {
+
+  padding:10px 16px;
+
+  border-radius:10px;
+
+  text-decoration:none;
+
+  border:1px solid #ddd;
+
+  background:white;
+
+  color:#111827;
+
+}
+
+
+.logout {
+
+  cursor:pointer;
+
+}
+
+
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+  .page {
+
+    padding:12px;
+
+  }
+
+
+  .actions {
+
+    flex-direction:column;
+
+  }
+
+
+  .campaign {
+
+    border-radius:12px;
+
+  }
+
 }
