@@ -31,6 +31,16 @@ function saveSelectedMember() {
   if (m?.id) sessionStorage.setItem(SELECTED_MEMBER_KEY, m.id);
 }
 
+function restoreSelectedMember() {
+  const savedId = sessionStorage.getItem(SELECTED_MEMBER_KEY);
+  if (!savedId || !state.members.length) return;
+
+  const savedIndex = state.members.findIndex(member => String(member.id) === String(savedId));
+  if (savedIndex >= 0) {
+    state.selectedIndex = savedIndex;
+  }
+}
+
 function loginView(message = "") {
   app.innerHTML = `
   <main class="login-shell">
@@ -132,8 +142,7 @@ function setBanner() {
   const code =
     (member?.banner_code || "").trim();
 
-  frame.srcdoc =
-frame.srcdoc = `
+  frame.srcdoc = `
 <style>
 html, body {
   margin:0;
@@ -423,7 +432,16 @@ async function loadDashboard(){
  members || [];
 
 
- state.selectedIndex=0;
+ // Keep the currently selected offer when the dashboard is rebuilt
+ // (for example after returning from an Unlock tab or an auth-state refresh).
+ // Only Previous/Next should change the selected offer.
+ restoreSelectedMember();
+
+ // On a completely fresh session, start from the first offer and persist it.
+ if (!sessionStorage.getItem(SELECTED_MEMBER_KEY) && state.members.length) {
+   state.selectedIndex = 0;
+   saveSelectedMember();
+ }
 
 
  await getUnlockStatus();
