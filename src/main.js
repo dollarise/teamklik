@@ -14,6 +14,7 @@ const state = {
 
 const SELECTED_MEMBER_KEY = "teamklik_selected_member_id";
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1E2QjwSCs1Gdc_3m54xVLTbIkR0P74XdLcrg5UoOC1Pg";
+const AUTOMONE_ORIGIN = "https://automone.pages.dev";
 
 const esc = (v = "") =>
   String(v)
@@ -40,6 +41,42 @@ function restoreSelectedMember() {
     state.selectedIndex = savedIndex;
   }
 }
+
+function clickAccessLinkFromAutomone(data) {
+  const candidates = document.querySelectorAll("a, button");
+
+  for (const element of candidates) {
+    const text = element.textContent?.trim().replace(/\s+/g, " ");
+
+    if (
+      text === "Akses Link" &&
+      !element.disabled &&
+      element.getAttribute("aria-disabled") !== "true"
+    ) {
+      element.click();
+
+      window.parent.postMessage(
+        {
+          type: "ACCESS_LINK_CLICKED",
+          offerIndex: data?.offerIndex
+        },
+        AUTOMONE_ORIGIN
+      );
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+window.addEventListener("message", event => {
+  if (event.origin !== AUTOMONE_ORIGIN) return;
+  if (event.source !== window.parent) return;
+  if (!event.data || event.data.type !== "AUTOMONE_CLICK_ACCESS_LINK") return;
+
+  clickAccessLinkFromAutomone(event.data);
+});
 
 function loginView(message = "") {
   app.innerHTML = `
